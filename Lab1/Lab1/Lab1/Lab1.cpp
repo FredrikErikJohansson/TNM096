@@ -5,8 +5,32 @@
 #include <set>
 #include <tuple>
 #include <stdlib.h>
+#include <time.h>
 
+std::string generateStart();
+
+// worst-case: start = 806547231 if goal = 012345678
 const std::string goal = "012345678";
+const std::string start = generateStart();
+
+std::string generateStart() {
+
+    std::string randomStart;
+    std::set<int> tiles;
+    int tile;
+    srand(time(NULL));
+
+    while (randomStart.size() < 9) {
+        tile = rand() % 9;
+        if (tiles.insert(tile).second) {
+            char a = tile + '0';
+            randomStart.push_back(a);
+        }
+    }
+
+    std::cout << "Start: " << randomStart << std::endl;
+    return randomStart;
+}
 
 int calcHeuristicMisplaced(std::string& state) {
     int h = 0;
@@ -20,7 +44,7 @@ int calcHeuristicMisplaced(std::string& state) {
 
 int calcHeuristicManhattan(std::string& state) {
     int h = 0;
-    int n = state.size() / 3;
+    const int n = state.size() / 3;
     int grid[3][3];
     int count = 0;
     int gi, gj;
@@ -44,7 +68,7 @@ int calcHeuristicManhattan(std::string& state) {
     return h;
 }
 
-std::tuple<int, std::string, int, std::string, int, std::vector<std::string>> move(int ind, std::string state, std::string dir, int numOfMoves, std::vector<std::string> solution) {
+std::tuple<int, std::string, int, std::string, int, std::vector<std::string>> move(int ind, std::string state, std::string&& dir, int numOfMoves, std::vector<std::string> solution) {
     if (dir == "left") {
         std::swap(state[ind], state[ind - 1]);
         ind--;
@@ -125,7 +149,7 @@ int main()
     std::set<std::string> closedSet;
     std::set<std::tuple<int, std::string, int, std::string, int, std::vector<std::string>>> possibleSet;
     std::vector<std::tuple<int, std::string, int, std::string, int, std::vector<std::string>>> openVec;
-    std::string state = "806547231";
+    std::string state = start;
     
     int ind = state.find("0");
     possibleSet.insert({ 0, state, ind, "start", 0, {} });
@@ -153,7 +177,7 @@ int main()
             for (int i = 0; i < std::get<5>(node).size(); i++) {
                 std::cout << std::get<5>(node)[i] << " -> ";
             }
-            std::cout << "goal" << std::endl;
+            std::cout << "GOAL" << std::endl;
 
             return 1;
         }
