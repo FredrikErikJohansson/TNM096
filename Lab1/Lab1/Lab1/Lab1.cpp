@@ -5,7 +5,7 @@
 #include <set>
 #include <tuple>
 
-const std::string goal = "123456780";
+const std::string goal = "012345678";
 
 int calcHeuristic(std::string& state) {
     int h = 0;
@@ -18,7 +18,7 @@ int calcHeuristic(std::string& state) {
     return h;
 }
 
-std::tuple<int, std::string, int, std::string, int> move(int ind, std::string state, std::string dir, int numOfMoves) {
+std::tuple<int, std::string, int, std::string, int, std::vector<std::string>> move(int ind, std::string state, std::string dir, int numOfMoves, std::vector<std::string> moves) {
     if (dir == "left") {
         std::swap(state[ind], state[ind - 1]);
         ind--;
@@ -39,7 +39,9 @@ std::tuple<int, std::string, int, std::string, int> move(int ind, std::string st
         ind += 3;
     }
 
-    return std::make_tuple(calcHeuristic(state) + numOfMoves, state, ind, dir, numOfMoves);
+    moves.push_back(dir);
+
+    return std::make_tuple(calcHeuristic(state) + numOfMoves, state, ind, dir, numOfMoves, moves);
 }
 
 
@@ -47,117 +49,102 @@ int main()
 {
 
     std::set<std::string> closedSet;
-    std::vector<std::tuple<int, std::string, int, std::string, int>> openVec;
-    std::vector<std::tuple<int, std::string, int, std::string, int>> possibleVec;
-    std::vector<std::string> solution;
-    std::string state = "721850436";
-    closedSet.insert(state);
+    std::vector<std::tuple<int, std::string, int, std::string, int, std::vector<std::string>>> openVec;
+    std::set<std::tuple<int, std::string, int, std::string, int, std::vector<std::string>>> possibleSet;
+    std::string state = "806547231";
+    
     int ind = state.find("0");
+    possibleSet.insert({ 0, state, ind, "start", 0, {} });
     int numOfMoves = 0;
     int lastNumOfMoves = numOfMoves;
-    
-    int count = 0;
+    std::vector<std::string> solution;
 
     while (true) {
+
+        if (possibleSet.empty()) {
+            std::cout << "No solution" << std::endl;
+            return 1;
+        }
+
+        auto node = *possibleSet.begin();
+        possibleSet.erase(possibleSet.begin()); // O(1)
+        closedSet.insert(std::get<1>(node)); // O(logN)
+
+        state = std::get<1>(node);
+        ind = std::get<2>(node);
+
+
+        solution = std::get<5>(node); // O(N)
+        numOfMoves = std::get<4>(node) + 1;
+
+        if (std::get<1>(node) == goal) {
+            std::cout << "Goal reached in " << std::get<4>(node) << " moves." << std::endl;
+
+            for (int i = 0; i < std::get<5>(node).size(); i++) {
+                std::cout << std::get<5>(node)[i] << " -> ";
+            }
+
+            std::cout << "goal" << std::endl;
+
+            return 1;
+        }
 
         //Consider every possible move
         switch (ind)
         {
         case 0:
-            openVec.push_back(move(ind, state, "right", numOfMoves));
-            openVec.push_back(move(ind, state, "down", numOfMoves));
+            openVec.push_back(move(ind, state, "right", numOfMoves, solution));
+            openVec.push_back(move(ind, state, "down", numOfMoves, solution));
             break;
         case 1:
-            openVec.push_back(move(ind, state, "left", numOfMoves));
-            openVec.push_back(move(ind, state, "right", numOfMoves));
-            openVec.push_back(move(ind, state, "down", numOfMoves));
+            openVec.push_back(move(ind, state, "left", numOfMoves, solution));
+            openVec.push_back(move(ind, state, "right", numOfMoves, solution));
+            openVec.push_back(move(ind, state, "down", numOfMoves, solution));
             break;
         case 2:
-            openVec.push_back(move(ind, state, "left", numOfMoves));
-            openVec.push_back(move(ind, state, "down", numOfMoves));
+            openVec.push_back(move(ind, state, "left", numOfMoves, solution));
+            openVec.push_back(move(ind, state, "down", numOfMoves, solution));
             break;
         case 3:
-            openVec.push_back(move(ind, state, "right", numOfMoves));
-            openVec.push_back(move(ind, state, "up", numOfMoves));
-            openVec.push_back(move(ind, state, "down", numOfMoves));
+            openVec.push_back(move(ind, state, "right", numOfMoves, solution));
+            openVec.push_back(move(ind, state, "up", numOfMoves, solution));
+            openVec.push_back(move(ind, state, "down", numOfMoves, solution));
             break;
         case 4:
-            openVec.push_back(move(ind, state, "left", numOfMoves));
-            openVec.push_back(move(ind, state, "right", numOfMoves));
-            openVec.push_back(move(ind, state, "up", numOfMoves));
-            openVec.push_back(move(ind, state, "down", numOfMoves));
+            openVec.push_back(move(ind, state, "left", numOfMoves, solution));
+            openVec.push_back(move(ind, state, "right", numOfMoves, solution));
+            openVec.push_back(move(ind, state, "up", numOfMoves, solution));
+            openVec.push_back(move(ind, state, "down", numOfMoves, solution));
             break;
         case 5:
-            openVec.push_back(move(ind, state, "left", numOfMoves));
-            openVec.push_back(move(ind, state, "up", numOfMoves));
-            openVec.push_back(move(ind, state, "down", numOfMoves));
+            openVec.push_back(move(ind, state, "left", numOfMoves, solution));
+            openVec.push_back(move(ind, state, "up", numOfMoves, solution));
+            openVec.push_back(move(ind, state, "down", numOfMoves, solution));
             break;
         case 6:
-            openVec.push_back(move(ind, state, "right", numOfMoves));
-            openVec.push_back(move(ind, state, "up", numOfMoves));
+            openVec.push_back(move(ind, state, "right", numOfMoves, solution));
+            openVec.push_back(move(ind, state, "up", numOfMoves, solution));
             break;
         case 7:
-            openVec.push_back(move(ind, state, "left", numOfMoves));
-            openVec.push_back(move(ind, state, "right", numOfMoves));
-            openVec.push_back(move(ind, state, "up", numOfMoves));
+            openVec.push_back(move(ind, state, "left", numOfMoves, solution));
+            openVec.push_back(move(ind, state, "right", numOfMoves, solution));
+            openVec.push_back(move(ind, state, "up", numOfMoves, solution));
             break;
         case 8:
-            openVec.push_back(move(ind, state, "left", numOfMoves));
-            openVec.push_back(move(ind, state, "up", numOfMoves));
+            openVec.push_back(move(ind, state, "left", numOfMoves, solution));
+            openVec.push_back(move(ind, state, "up", numOfMoves, solution));
             break;
         default:
             break;
         }
-
-        for (int i = 0; i < openVec.size(); i++) {
-            if (closedSet.find(std::get<1>(openVec[i])) == closedSet.end()) {
-                possibleVec.push_back(openVec[i]);
+        
+        
+        for (int i = 0; i < openVec.size(); i++) { // O(M) (M cant be bigger than 4)
+            if (closedSet.find(std::get<1>(openVec[i])) == closedSet.end()) { // O(logN)
+                possibleSet.insert(openVec[i]); // O(logN)
             }
         }
 
-        if (possibleVec.empty()) {
-            std::cout << "No solution found!" << std::endl;
-            return 1;
-        }
-
-        std::sort(possibleVec.rbegin(), possibleVec.rend());
-
-        state = std::get<1>(possibleVec.back());
-        ind = std::get<2>(possibleVec.back());
-        closedSet.insert(state);       
-         
-        if (numOfMoves < std::get<4>(possibleVec.back())) {
-            solution.clear();
-        }
-        solution.push_back(std::get<3>(possibleVec.back()));
-
-        numOfMoves = std::get<4>(possibleVec.back());
-        numOfMoves++;
-        possibleVec.pop_back();
-        //possibleVec.erase(possibleVec.end());
         openVec.clear();
-
-        if (state == goal) {
-            std::cout << "Reached goal!" << std::endl;
-
-            for (int i = 0; i > solution.size(); i++) {
-                std::cout << solution[i] << " ";
-            }
-
-            std::cout <<  std::endl << numOfMoves << std::endl;
-            return 1;
-        }
-
-            //std::cout << closedSet.size() << std::endl;
-        if(closedSet.size()%1000 == 0) std::cout << closedSet.size() << std::endl;
-
-
-        /*if (lastNumOfMoves == numOfMoves) {
-            std::cout << "No solution found!" << std::endl;
-            return 1;
-        }
-        else {
-            lastNumOfMoves = numOfMoves;
-        }*/
     }
 }
