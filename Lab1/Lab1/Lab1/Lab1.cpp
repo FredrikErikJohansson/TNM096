@@ -10,7 +10,8 @@
 std::string generateStart();
 
 // worst-case: start = 806547231 if goal = 012345678
-const std::string goal = "012345678";
+// worst-case: start = 867254301 if goal = 123456780
+const std::string goal = "123456780";
 const std::string start = generateStart();
 
 std::string generateStart() {
