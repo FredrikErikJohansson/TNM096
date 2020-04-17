@@ -12,15 +12,13 @@ std::string generateStart();
 // worst-case: start = 806547231 if goal = 012345678
 // worst-case: start = 867254301 if goal = 123456780
 const std::string goal = "123456780";
-const std::string start = "867254301";
+const std::string start = generateStart();
 
 std::string generateStart() {
-
     std::string randomStart;
     std::set<int> tiles;
     int tile;
     srand(time(NULL));
-
     while (randomStart.size() < 9) {
         tile = rand() % 9;
         if (tiles.insert(tile).second) {
@@ -28,19 +26,16 @@ std::string generateStart() {
             randomStart.push_back(a);
         }
     }
-
     std::cout << "Start: " << randomStart << std::endl;
     return randomStart;
 }
 
 int calcHeuristicMisplaced(std::string& state) {
     int h = 0;
-
     for (int i = 0; i < state.size(); i++) {
         if (state[i] == '0') continue;
         else if (state[i] != goal[i]) h++;
     }
-
     return h;
 }
 
@@ -50,7 +45,6 @@ int calcHeuristicManhattan(std::string& state) {
     int grid[3][3];
     int count = 0;
     int gi, gj;
-
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
             grid[i][j] = state[count] - '0';
@@ -63,7 +57,6 @@ int calcHeuristicManhattan(std::string& state) {
             count++;
         }
     }
-
     return h;
 }
 
@@ -72,23 +65,19 @@ std::tuple<int, std::string, int, std::string, int, std::vector<std::string>> mo
         std::swap(state[ind], state[ind - 1]);
         ind--;
     }
-
     if (dir == "right") {
         std::swap(state[ind], state[ind + 1]);
         ind++;
     }
-
     if (dir == "up") {
         std::swap(state[ind], state[ind - 3]);
         ind -= 3;
     }
-
     if (dir == "down") {
         std::swap(state[ind], state[ind + 3]);
         ind += 3;
     }
     solution.push_back(dir);
-
     return std::make_tuple(calcHeuristicManhattan(state) + numOfMoves, state, ind, dir, numOfMoves, solution);
 }
 
@@ -143,46 +132,36 @@ void considerMove(int ind, std::string state, int numOfMoves, std::vector<std::s
 }
 
 
-int main()
-{
+int main() {
     std::set<std::string> closedSet;
     std::set<std::tuple<int, std::string, int, std::string, int, std::vector<std::string>>> possibleSet;
     std::vector<std::tuple<int, std::string, int, std::string, int, std::vector<std::string>>> openVec;
-    std::string state = start;
-    
+    std::string state = start;  
     int ind = state.find("0");
     possibleSet.insert({ 0, state, ind, "start", 0, {} });
     int numOfMoves = 0;
     std::vector<std::string> solution;
-
     while (true) {
         if (possibleSet.empty()) {
             std::cout << "No solution" << std::endl;
             return 1;
         }
-
         auto node = *possibleSet.begin();
         possibleSet.erase(possibleSet.begin()); // O(1)
         closedSet.insert(std::get<1>(node)); // O(logN)
-
         state = std::get<1>(node);
         ind = std::get<2>(node);
-
         solution = std::get<5>(node); // O(N)
         numOfMoves = std::get<4>(node) + 1;
-
         if (std::get<1>(node) == goal) {
             std::cout << "Goal reached in " << std::get<4>(node) << " moves." << std::endl;
             for (int i = 0; i < std::get<5>(node).size(); i++) {
                 std::cout << std::get<5>(node)[i] << " -> ";
             }
             std::cout << "GOAL" << std::endl;
-
             return 1;
         }
-
-        considerMove(ind, state, numOfMoves, solution, openVec); //O(1)
-        
+        considerMove(ind, state, numOfMoves, solution, openVec); //O(1)    
         for (int i = 0; i < openVec.size(); i++) { // O(M) (M cant be bigger than 4)
             if (closedSet.find(std::get<1>(openVec[i])) == closedSet.end()) { // O(logN)
                 possibleSet.insert(openVec[i]); // O(logN)

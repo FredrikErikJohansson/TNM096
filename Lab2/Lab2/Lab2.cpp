@@ -1,5 +1,5 @@
 #include <iostream>
-#include <set>
+#include <unordered_set>
 #include <vector>
 #include <algorithm>
 #include <string>
@@ -16,13 +16,12 @@ const std::vector<std::string> scheduleItems = { "MT101", "MT102", "MT103",
 
 
 struct Csp {
-	
 	std::vector<std::string> schedule;
-	std::set<int> conflicts;
+	std::unordered_set<int> conflicts;
 	int score = 25;
 
 	void initialize() { // Random initial scheduele
-		std::set<int> indices;
+		std::unordered_set<int> indices;
 		srand(time(NULL));
 		while (indices.size() < scheduleItems.size()) {
 			int ind = rand() % scheduleItems.size();
@@ -37,22 +36,18 @@ struct Csp {
 			std::string class1 = schedule[i];
 			std::string class2 = schedule[i + 1];
 			std::string class3 = schedule[i + 2];
-
-
 			if (class1[2] == class2[2]) {
 				if (class1[2] != '5') { // Special case
 					conflicts.insert(i);
 					conflicts.insert(i + 1);
 				}		
 			}
-
 			if (class1[2] == class3[2]) {
 				if (class1[2] != '5') { // Special case
 					conflicts.insert(i);
 					conflicts.insert(i + 2);
 				}
 			}
-
 			if (class2[2] == class3[2]) {
 				if (class2[2] != '5') { // Special case
 					conflicts.insert(i + 1);
@@ -66,7 +61,6 @@ struct Csp {
 		int ind = rand() % conflicts.size();
 		while(ind == prev) // Never pick the same ind as prev
 			ind = rand() % conflicts.size();
-
 		return ind;
 	}
 
@@ -89,7 +83,6 @@ struct Csp {
 			std::swap(schedule[var], schedule[i]); // Swap back
 			calcConflicts();
 		}
-
 		return bestSwaps[rand() % bestSwaps.size()];
 	}
 
@@ -125,27 +118,22 @@ int calcScore(std::vector<std::string> schedule) {
 		if (blank1 == i) score--;
 		if (blank2 == i) score--;
 	}
-
 	for (int i = 9; i < 12; i++) { // 12 AM
 		if (blank1 == i) score--;
 		if (blank2 == i) score--;
 	}
-
 	for (int i = 12; i < 15; i++) { // 1 PM
 		if (MT501 == i) score--;
 		if (MT502 == i) score--;
 	}
-
 	for (int i = 15; i < 18; i++) { // 2 PM
 		if (MT501 == i) score--;
 		if (MT502 == i) score--;
 	}
-
 	for (int i = 21; i < 24; i++) { // 4 PM
 		if (blank1 == i) score--;
 		if (blank2 == i) score--;
 	}
-
 	return score;
 }
 
@@ -176,7 +164,6 @@ void preferences(Csp& csp, const int max_steps, int max_tests) {
 			bestCsp = csp;
 		}
 	}
-
 	csp = bestCsp;
 }
 
@@ -187,13 +174,13 @@ int main() {
 	csp.calcConflicts();
 	const int max_steps = 1000;
 	const int max_tests = 1000;
-	std::cout << "Initial schedual: " << std::endl;
+	std::cout << "Initial schedule: " << std::endl;
 	csp.print();
 
 	solve(csp, max_steps); // TASK 3
-	//preferences(csp, max_steps, max_tests); //Task 4
+	//preferences(csp, max_steps, max_tests); // TASK 4
 
-	std::cout << "Final schedual: " << std::endl;
+	std::cout << "Final schedule: " << std::endl;
 	csp.print();
 	return 1;
 }
