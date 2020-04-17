@@ -23,6 +23,7 @@ struct Csp {
 	void initialize() { // Random initial scheduele
 		std::unordered_set<int> indices;
 		srand(time(NULL));
+		schedule.clear();
 		while (indices.size() < scheduleItems.size()) {
 			int ind = rand() % scheduleItems.size();
 			if (indices.insert(ind).second)
@@ -89,7 +90,7 @@ struct Csp {
 	void print() {
 		std::cout << "   TP51   SP34   K3" << std::endl;
 		std::cout << "   ----   ----   ----" << std::endl;
-		std::replace(schedule.begin(), schedule.end(), "aaaaa", "     ");
+		std::replace(schedule.begin(), schedule.end(), "aaaaa", "     "); // Make it pretty
 		std::replace(schedule.begin(), schedule.end(), "bbbbb", "     ");
 
 		int time = 9;
@@ -99,8 +100,8 @@ struct Csp {
 			if (time == 13) time = 1;
 		}
 
-		std::replace(schedule.begin(), schedule.end(), "     ", "aaaaa");
-		std::replace(schedule.begin(), schedule.end(), "     ", "bbbbb");
+		std::replace(schedule.begin(), schedule.end(), "     ", "aaaaa"); // Make it functional again
+		*std::find(schedule.begin(), schedule.end(), "aaaaa") = "bbbbb";
 		std::cout << std::endl << "Number of conflicts: " << conflicts.size() << std::endl;
 		if (score < 25) std::cout << "Unsatisfied preferences: " << score << std::endl;
 		std::cout << std::endl;
