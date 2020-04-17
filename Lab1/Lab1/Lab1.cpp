@@ -12,7 +12,7 @@ std::string generateStart();
 // worst-case: start = 806547231 if goal = 012345678
 // worst-case: start = 867254301 if goal = 123456780
 const std::string goal = "123456780";
-const std::string start = generateStart();
+const std::string start = "867254301";
 
 std::string generateStart() {
 
@@ -37,7 +37,8 @@ int calcHeuristicMisplaced(std::string& state) {
     int h = 0;
 
     for (int i = 0; i < state.size(); i++) {
-        if (state[i] != goal[i]) h++;
+        if (state[i] == '0') continue;
+        else if (state[i] != goal[i]) h++;
     }
 
     return h;
@@ -53,14 +54,11 @@ int calcHeuristicManhattan(std::string& state) {
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
             grid[i][j] = state[count] - '0';
-            gi = (grid[i][j] - 1) / 3;
-            gj = abs((grid[i][j] - 1) % 3); 
 
-            if (grid[i][j] == 0) {
-                gi = 2;
-                gj = 2;
-            }
-            
+            if (grid[i][j] == 0) continue;
+
+            gi = (grid[i][j] - 1) / 3;
+            gj = abs((grid[i][j] - 1) % 3);       
             h += abs(i - gi) + abs(j - gj);
             count++;
         }
@@ -91,7 +89,7 @@ std::tuple<int, std::string, int, std::string, int, std::vector<std::string>> mo
     }
     solution.push_back(dir);
 
-    return std::make_tuple(calcHeuristicMisplaced(state) + numOfMoves, state, ind, dir, numOfMoves, solution);
+    return std::make_tuple(calcHeuristicManhattan(state) + numOfMoves, state, ind, dir, numOfMoves, solution);
 }
 
 void considerMove(int ind, std::string state, int numOfMoves, std::vector<std::string> solution, std::vector<std::tuple<int, std::string, int, std::string, int, std::vector<std::string>>>& openVec) {
