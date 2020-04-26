@@ -157,6 +157,7 @@ void preferences(Csp& csp, const int max_steps, int max_tests) {
 	int maxScore = INT_MAX;
 	int score = 24;
 	for (int i = 0; i < max_tests; i++) {
+		csp.initialize();
 		solve(csp, max_steps);
 		score = calcScore(csp.schedule);
 		csp.score = score;
@@ -178,8 +179,8 @@ int main() {
 	std::cout << "Initial schedule: " << std::endl;
 	csp.print();
 
-	solve(csp, max_steps); // TASK 3
-	//preferences(csp, max_steps, max_tests); // TASK 4
+	//solve(csp, max_steps); // TASK 3
+	preferences(csp, max_steps, max_tests); // TASK 4
 
 	std::cout << "Final schedule: " << std::endl;
 	csp.print();
