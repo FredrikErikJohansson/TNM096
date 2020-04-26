@@ -8,6 +8,14 @@ struct Claus {
     std::vector<std::string> n;
     bool tautology = false;
 
+    bool operator==(const Claus& c) {
+        return (this->p == c.p && this->n == c.n);
+    }
+
+    bool operator!=(const Claus& c) {
+        return !(this->p == c.p && this->n == c.n);
+    }
+
     void clear() {
         p.clear();
         n.clear();
@@ -19,17 +27,13 @@ struct Claus {
         p.erase(std::unique(p.begin(), p.end()), p.end());
         n.erase(std::unique(n.begin(), n.end()), n.end());
     }
-
-    bool compareClaus(Claus &c) {
-        return (this->p == c.p && this->n == c.n);
-    }
 };
 
 bool compare(std::vector<Claus>& l, std::vector<Claus>& r) {
     if (l.size() != r.size()) return false;
 
     for (int i = 0; i < l.size(); i++) {
-        if (!l[i].compareClaus(r[i])) {
+        if (l[i] != r[i]) {
             return false;
         }
     }
@@ -91,19 +95,30 @@ std::vector<Claus> incorporateClause(Claus A, std::vector<Claus> KB) {
     //if B in KB such B.p subset of A.p and B.n subset of A.n
     std::sort(A.p.begin(), A.p.end());
     std::sort(A.n.begin(), A.n.end());
-    auto it = KB.begin();
-    while (it != KB.end()) {
-        Claus BA;
-        std::sort(it->p.begin(), it->p.end());
-        std::sort(it->n.begin(), it->n.end());
-        std::set_intersection(it->p.begin(), it->p.end(), A.p.begin(), A.p.end(), std::back_inserter(BA.p));
-        std::set_intersection(it->n.begin(), it->n.end(), A.n.begin(), A.n.end(), std::back_inserter(BA.n));
 
-        if (BA.p == it->p && BA.n == it->n) {
+    for (auto B : KB) {
+        Claus BA;
+        std::sort(B.p.begin(), B.p.end());
+        std::sort(B.n.begin(), B.n.end());
+        std::set_intersection(B.p.begin(), B.p.end(), A.p.begin(), A.p.end(), std::back_inserter(BA.p));
+        std::set_intersection(B.n.begin(), B.n.end(), A.n.begin(), A.n.end(), std::back_inserter(BA.n));
+
+        if (BA.p == B.p && BA.n == B.n) {
             return KB;
         }
+    }
 
-        if (!BA.p.empty() || !BA.n.empty()) {
+
+;
+    for (auto it = KB.begin(); it != KB.end();) {
+        Claus AB;
+        std::sort(it->p.begin(), it->p.end());
+        std::sort(it->n.begin(), it->n.end());
+        std::set_intersection(A.p.begin(), A.p.end(), it->p.begin(), it->p.end(), std::back_inserter(AB.p));
+        std::set_intersection(A.n.begin(), A.n.end(), it->n.begin(), it->n.end(), std::back_inserter(AB.n));
+
+        //TODO: Fix this
+        if ((AB.p == A.p && AB.n == A.n) && (!AB.p.empty() || !AB.n.empty())) {
             it = KB.erase(it);
         }
         else {
@@ -111,12 +126,14 @@ std::vector<Claus> incorporateClause(Claus A, std::vector<Claus> KB) {
         }
     }
 
-    Claus KBA;
+    /*Claus KBA;
     for (auto KBi : KB) {
         std::set_union(KBi.p.begin(), KBi.p.end(), A.p.begin(), A.p.end(), std::back_inserter(KBA.p));
         std::set_union(KBi.n.begin(), KBi.n.end(), A.n.begin(), A.n.end(), std::back_inserter(KBA.n));
-    }
-    KB.push_back(KBA);
+    }*/
+    if (std::find(KB.begin(), KB.end(), A) == KB.end())
+        KB.push_back(A);
+
     return KB;
 }
 
@@ -133,6 +150,7 @@ std::vector<Claus> solver(std::vector<Claus> KB) {
     std::vector<Claus> KBprime = KB;
 
     while(true) {
+        S.clear();
         for (int i = 0; i < KB.size(); i++) {
             for (int j = 0; j < KB.size(); j++) {
                 if (i == j) continue;
@@ -150,7 +168,10 @@ std::vector<Claus> solver(std::vector<Claus> KB) {
                     }*/
                     //if (S.empty()) SC = C;
                     //SC.removeDuplicates();
-                    S.push_back(C);
+                    //if(std::find_if(S.begin(), S.end(), compare) == S.end())
+                    if (std::find(S.begin(), S.end(), C) == S.end())
+                        S.push_back(C);
+                    //if(SC == C) S.push_back(C);
                 }
             }
         }
@@ -160,7 +181,9 @@ std::vector<Claus> solver(std::vector<Claus> KB) {
 
         KB = incorporate(S, KB);
 
-        if (compare(KBprime, KB)) return KB;
+        if (compare(KBprime, KB)) {
+            return KB;
+        }
     }
 }
 
