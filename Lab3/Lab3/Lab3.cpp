@@ -9,11 +9,11 @@ struct Claus {
     bool tautology = false;
 
     bool operator==(const Claus& c) {
-        return (this->p == c.p && this->n == c.n);
+        return (p == c.p && n == c.n);
     }
 
     bool operator!=(const Claus& c) {
-        return !(this->p == c.p && this->n == c.n);
+        return !(p == c.p && n == c.n);
     }
 
     void clear() {
@@ -26,6 +26,17 @@ struct Claus {
         sort(n.begin(), n.end());
         p.erase(std::unique(p.begin(), p.end()), p.end());
         n.erase(std::unique(n.begin(), n.end()), n.end());
+    }
+
+    void print() {
+        for (int i = 0; i < p.size(); i++) {
+            std::cout << p[i] << " ";
+            if (!n.empty()) std::cout << "v ";
+        }
+        for (int i = 0; i < n.size(); i++) {
+            std::cout << "-" << n[i] << " ";
+            if (i != n.size() - 1) std::cout << "v ";
+        }
     }
 };
 
@@ -40,6 +51,22 @@ bool compare(std::vector<Claus>& l, std::vector<Claus>& r) {
     return true;
 }
 
+std::vector<std::string> setIntersection(std::vector<std::string>& A, std::vector<std::string>& B) {
+    std::vector<std::string> C;
+    std::sort(A.begin(), A.end());
+    std::sort(B.begin(), B.end());
+    std::set_intersection(A.begin(), A.end(), B.begin(), B.end(), std::back_inserter(C));
+    return C;
+}
+
+std::vector<std::string> setUnion(std::vector<std::string>& A, std::vector<std::string>& B) {
+    std::vector<std::string> C;
+    std::sort(A.begin(), A.end());
+    std::sort(B.begin(), B.end());
+    std::set_union(A.begin(), A.end(), B.begin(), B.end(), std::back_inserter(C));
+    return C;
+}
+
 template<typename S>
 auto selectRandom(const S& s, size_t n) {
     auto it = std::begin(s);
@@ -50,18 +77,12 @@ auto selectRandom(const S& s, size_t n) {
 
 Claus resolution(Claus A, Claus B) {
     Claus C;
-    std::vector<std::string> ApBn;
-    std::vector<std::string> AnBp;
-    std::sort(A.p.begin(), A.p.end());
-    std::sort(A.n.begin(), A.n.end());
-    std::sort(B.p.begin(), B.p.end());
-    std::sort(B.n.begin(), B.n.end());
-    std::set_intersection(A.p.begin(), A.p.end(), B.n.begin(), B.n.end(), std::back_inserter(ApBn));
-    std::set_intersection(A.n.begin(), A.n.end(), B.p.begin(), B.p.end(), std::back_inserter(AnBp));
+    std::vector<std::string> ApBn = setIntersection(A.p, B.n);
+    std::vector<std::string> AnBp = setIntersection(A.n, B.p);
     
     if (ApBn.empty() && AnBp.empty()) {
         C.tautology = true;
-        return C; // False
+        return C; // Tautology
     }
 
     if (!ApBn.empty()) {
@@ -75,62 +96,48 @@ Claus resolution(Claus A, Claus B) {
         B.p.erase(std::remove(B.p.begin(), B.p.end(), a), B.p.end());
     }
 
-    std::set_union(A.p.begin(), A.p.end(), B.p.begin(), B.p.end(), std::back_inserter(C.p));
-    std::set_union(A.n.begin(), A.n.end(), B.n.begin(), B.n.end(), std::back_inserter(C.n));
-    std::vector<std::string> CpCn;
-    std::set_intersection(C.p.begin(), C.p.end(), C.n.begin(), C.n.end(), std::back_inserter(CpCn));
+    C.p = setUnion(A.p, B.p);
+    C.n = setUnion(A.n, B.n);
+    std::vector<std::string> CpCn = setIntersection(C.p, C.n);
 
     if (!CpCn.empty()) {
         C.tautology = true;
-        return C; // False
+        return C; // Tautology
     }
 
     C.removeDuplicates();
     return C;
 }
 
-
 std::vector<Claus> incorporateClause(Claus A, std::vector<Claus> KB) {
-    // Subset = if B intersection A = B
-    //if B in KB such B.p subset of A.p and B.n subset of A.n
-    std::sort(A.p.begin(), A.p.end());
-    std::sort(A.n.begin(), A.n.end());
-
     for (auto B : KB) {
         Claus BA;
-        std::sort(B.p.begin(), B.p.end());
-        std::sort(B.n.begin(), B.n.end());
-        std::set_intersection(B.p.begin(), B.p.end(), A.p.begin(), A.p.end(), std::back_inserter(BA.p));
-        std::set_intersection(B.n.begin(), B.n.end(), A.n.begin(), A.n.end(), std::back_inserter(BA.n));
+        BA.p = setIntersection(B.p, A.p);
+        BA.n = setIntersection(B.n, A.n);
 
         if (BA.p == B.p && BA.n == B.n) {
             return KB;
         }
     }
 
-
-;
     for (auto it = KB.begin(); it != KB.end();) {
         Claus AB;
-        std::sort(it->p.begin(), it->p.end());
-        std::sort(it->n.begin(), it->n.end());
-        std::set_intersection(A.p.begin(), A.p.end(), it->p.begin(), it->p.end(), std::back_inserter(AB.p));
-        std::set_intersection(A.n.begin(), A.n.end(), it->n.begin(), it->n.end(), std::back_inserter(AB.n));
+        AB.p = setIntersection(A.p, it->p);
+        AB.n = setIntersection(A.n, it->n);
 
-        //TODO: Fix this
-        if ((AB.p == A.p && AB.n == A.n) && (!AB.p.empty() || !AB.n.empty())) {
+        size_t orgP = it->p.size();
+        size_t orgN = it->n.size();
+        size_t size1 = AB.p.size();
+        size_t size2 = AB.n.size();
+
+        if ((AB.p == A.p && AB.n == A.n) && (size1 < orgP || size2 < orgN)) {
             it = KB.erase(it);
         }
         else {
-            ++it;
+            it++;
         }
     }
 
-    /*Claus KBA;
-    for (auto KBi : KB) {
-        std::set_union(KBi.p.begin(), KBi.p.end(), A.p.begin(), A.p.end(), std::back_inserter(KBA.p));
-        std::set_union(KBi.n.begin(), KBi.n.end(), A.n.begin(), A.n.end(), std::back_inserter(KBA.n));
-    }*/
     if (std::find(KB.begin(), KB.end(), A) == KB.end())
         KB.push_back(A);
 
@@ -144,34 +151,20 @@ std::vector<Claus> incorporate(std::vector<Claus> S, std::vector<Claus> KB) {
     return KB;
 }
 
-
 std::vector<Claus> solver(std::vector<Claus> KB) {
     std::vector<Claus> S;
-    std::vector<Claus> KBprime = KB;
+    std::vector<Claus> KBprime;
 
     while(true) {
         S.clear();
+        KBprime = KB;
         for (int i = 0; i < KB.size(); i++) {
             for (int j = 0; j < KB.size(); j++) {
                 if (i == j) continue;
                 Claus C = resolution(KB[i], KB[j]);
                 if (!C.tautology) {
-                    Claus SC;
-
-                   /* for (auto Si : S) {
-                        std::sort(C.p.begin(), C.p.end());
-                        std::sort(C.n.begin(), C.n.end());
-                        std::sort(Si.p.begin(), Si.p.end());
-                        std::sort(Si.n.begin(), Si.n.end());
-                        std::set_intersection(Si.p.begin(), Si.p.end(), C.p.begin(), C.p.end(), std::back_inserter(SC.p));
-                        std::set_intersection(Si.n.begin(), Si.n.end(), C.n.begin(), C.n.end(), std::back_inserter(SC.n));
-                    }*/
-                    //if (S.empty()) SC = C;
-                    //SC.removeDuplicates();
-                    //if(std::find_if(S.begin(), S.end(), compare) == S.end())
                     if (std::find(S.begin(), S.end(), C) == S.end())
                         S.push_back(C);
-                    //if(SC == C) S.push_back(C);
                 }
             }
         }
@@ -180,39 +173,67 @@ std::vector<Claus> solver(std::vector<Claus> KB) {
         }
 
         KB = incorporate(S, KB);
-
+        
         if (compare(KBprime, KB)) {
             return KB;
         }
     }
 }
 
-
-int main()
-{
-    //Claus resolution(Claus A, Claus B)
+int main() {
     Claus A;
     Claus B;
     Claus C;
     Claus D;
     Claus E;
-    A.p = { "ice" };
-    A.n = { "sun", "money" };
-    B.p = { "ice", "movie" };
-    B.n = { "money" };
-    C.p = { "money" };
-    C.n = { "movie" };
-    D.p = { };
-    D.n = { "movie", "ice" };
-    E.p = { "movie" };
+
+    //TASK A:
+    //A.p = { "ice" };
+    //A.n = { "sun", "money" };
+    //B.p = { "ice", "movie" };
+    //B.n = { "money" };
+    //C.p = { "money" };
+    //C.n = { "movie" };
+    //D.p = {};
+    //D.n = { "movie", "ice" };
+    //E.p = { "movie" };
+    //E.n = {};
+
+    //TASK B:
+    //(B => C) &
+    //(B => A) &
+    //(C <=> A) &
+    //(A | B | C)
+   
+    //(-B v C) &
+    //(-B v A) &
+    //(-C v A) &
+    //(C v -A) &
+    //(A v B v C)
+
+    A.p = { "C" };
+    A.n = { "B" };
+    B.p = { "A" };
+    B.n = { "B" };
+    C.p = { "A" };
+    C.n = { "C" };
+    D.p = { "C" };
+    D.n = { "A" };
+    E.p = { "A", "B", "C" };
+    E.n = {  };
+
     std::vector<Claus> KB;
-    std::vector<Claus> result;
     KB.push_back(A);
     KB.push_back(B);
     KB.push_back(C);
     KB.push_back(D);
     KB.push_back(E);
-    //Claus C = resolution(A, B);
-    result = solver(KB);
+    KB = solver(KB);
+    std::cout << "KB = { ";
+    for (int i = 0; i < KB.size(); i++) {
+        KB[i].print();
+        if(i != KB.size() - 1) std::cout << ", ";
+    }     
+    std::cout << "}" << std::endl;
     return 1;
 }
