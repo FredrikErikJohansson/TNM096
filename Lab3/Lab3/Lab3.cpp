@@ -110,20 +110,14 @@ Claus resolution(Claus A, Claus B) {
 }
 
 std::vector<Claus> incorporateClause(Claus A, std::vector<Claus> KB) {
-    for (auto B : KB) {
-        Claus BA;
-        BA.p = setIntersection(B.p, A.p);
-        BA.n = setIntersection(B.n, A.n);
-
-        if (BA.p == B.p && BA.n == B.n) {
-            return KB;
-        }
-    }
-
     for (auto it = KB.begin(); it != KB.end();) {
         Claus AB;
         AB.p = setIntersection(A.p, it->p);
         AB.n = setIntersection(A.n, it->n);
+
+        Claus BA;
+        BA.p = setIntersection(it->p, A.p);
+        BA.n = setIntersection(it->n, A.n);
 
         size_t orgP = it->p.size();
         size_t orgN = it->n.size();
@@ -132,6 +126,9 @@ std::vector<Claus> incorporateClause(Claus A, std::vector<Claus> KB) {
 
         if ((AB.p == A.p && AB.n == A.n) && (size1 < orgP || size2 < orgN)) {
             it = KB.erase(it);
+        } 
+        else if(BA.p == it->p && BA.n == it->n) {
+            return KB;
         }
         else {
             it++;
@@ -188,39 +185,39 @@ int main() {
     Claus E;
 
     //TASK A:
-    //A.p = { "ice" };
-    //A.n = { "sun", "money" };
-    //B.p = { "ice", "movie" };
-    //B.n = { "money" };
-    //C.p = { "money" };
-    //C.n = { "movie" };
-    //D.p = {};
-    //D.n = { "movie", "ice" };
-    //E.p = { "movie" };
-    //E.n = {};
+    A.p = { "ice" };
+    A.n = { "sun", "money" };
+    B.p = { "ice", "movie" };
+    B.n = { "money" };
+    C.p = { "money" };
+    C.n = { "movie" };
+    D.p = {};
+    D.n = { "movie", "ice" };
+    E.p = { "movie" };
+    E.n = {};
 
     //TASK B:
-    //(B => C) &
-    //(B => A) &
-    //(C <=> A) &
-    //(A | B | C)
+    ////(B => C) &
+    ////(B => A) &
+    ////(C <=> A) &
+    ////(A | B | C)
    
-    //(-B v C) &
-    //(-B v A) &
-    //(-C v A) &
-    //(C v -A) &
-    //(A v B v C)
+    ////(-B v C) &
+    ////(-B v A) &
+    ////(-C v A) &
+    ////(C v -A) &
+    ////(A v B v C)
 
-    A.p = { "C" };
-    A.n = { "B" };
-    B.p = { "A" };
-    B.n = { "B" };
-    C.p = { "A" };
-    C.n = { "C" };
-    D.p = { "C" };
-    D.n = { "A" };
-    E.p = { "A", "B", "C" };
-    E.n = {  };
+    //A.p = { "C" };
+    //A.n = { "B" };
+    //B.p = { "A" };
+    //B.n = { "B" };
+    //C.p = { "A" };
+    //C.n = { "C" };
+    //D.p = { "C" };
+    //D.n = { "A" };
+    //E.p = { "A", "B", "C" };
+    //E.n = {  };
 
     std::vector<Claus> KB;
     KB.push_back(A);
