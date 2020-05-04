@@ -197,28 +197,21 @@ int main() {
     E.n = {};
 
     //TASK B:
-    ////(B => C) &
-    ////(B => A) &
-    ////(C <=> A) &
-    ////(A | B | C)
-   
-    ////(-B v C) &
-    ////(-B v A) &
+    ////(C => A) &
+    ////(-C => A) & (since B can't drive)
+    ////(-B => A)
+
     ////(-C v A) &
-    ////(C v -A) &
-    ////(A v B v C)
+    ////(C v A) &
+    ////(B v A)
 
-    //A.p = { "C" };
-    //A.n = { "B" };
-    //B.p = { "A" };
-    //B.n = { "B" };
-    //C.p = { "A" };
-    //C.n = { "C" };
-    //D.p = { "C" };
-    //D.n = { "A" };
-    //E.p = { "A", "B", "C" };
-    //E.n = {  };
-
+    //A.p = { "A" };
+    //A.n = { "C" };
+    //B.p = { "A", "C" };
+    //B.n = {  };
+    //C.p = { "A", "B" };
+    //C.n = { };
+   
     std::vector<Claus> KB;
     KB.push_back(A);
     KB.push_back(B);
