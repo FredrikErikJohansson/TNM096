@@ -2,10 +2,11 @@
 #include <unordered_set>
 #include <string>
 #include <algorithm>
+#include <vector>
 
 struct Claus {
-    std::vector<std::string> p;
-    std::vector<std::string> n;
+    std::vector<std::string> p{};
+    std::vector<std::string> n{};
     bool tautology = false;
 
     bool operator==(const Claus& c) {
@@ -29,11 +30,11 @@ struct Claus {
     }
 
     void print() {
-        for (int i = 0; i < p.size(); i++) {
+        for (size_t i = 0; i < p.size(); i++) {
             std::cout << p[i] << " ";
             if (!n.empty()) std::cout << "v ";
         }
-        for (int i = 0; i < n.size(); i++) {
+        for (size_t i = 0; i < n.size(); i++) {
             std::cout << "-" << n[i] << " ";
             if (i != n.size() - 1) std::cout << "v ";
         }
@@ -43,7 +44,7 @@ struct Claus {
 bool compare(std::vector<Claus>& l, std::vector<Claus>& r) {
     if (l.size() != r.size()) return false;
 
-    for (int i = 0; i < l.size(); i++) {
+    for (size_t i = 0; i < l.size(); i++) {
         if (l[i] != r[i]) {
             return false;
         }
@@ -141,7 +142,7 @@ std::vector<Claus> incorporateClause(Claus A, std::vector<Claus> KB) {
     return KB;
 }
 
-std::vector<Claus> incorporate(std::vector<Claus> S, std::vector<Claus> KB) {
+std::vector<Claus> incorporate(std::vector<Claus> const& S, std::vector<Claus> KB) {
     for (auto A : S) {
         KB = incorporateClause(A, KB);
     }
@@ -155,8 +156,8 @@ std::vector<Claus> solver(std::vector<Claus> KB) {
     while(true) {
         S.clear();
         KBprime = KB;
-        for (int i = 0; i < KB.size(); i++) {
-            for (int j = 0; j < KB.size(); j++) {
+        for (size_t i = 0; i < KB.size(); i++) {
+            for (size_t j = 0; j < KB.size(); j++) {
                 if (i == j) continue;
                 Claus C = resolution(KB[i], KB[j]);
                 if (!C.tautology) {
@@ -220,7 +221,7 @@ int main() {
     KB.push_back(E);
     KB = solver(KB);
     std::cout << "KB = { ";
-    for (int i = 0; i < KB.size(); i++) {
+    for (size_t i = 0; i < KB.size(); i++) {
         KB[i].print();
         if(i != KB.size() - 1) std::cout << ", ";
     }     
