@@ -32,7 +32,7 @@ std::string generateStart() {
 
 int calcHeuristicMisplaced(std::string& state) {
     int h = 0;
-    for (int i = 0; i < state.size(); i++) {
+    for (size_t i = 0; i < state.size(); i++) {
         if (state[i] == '0') continue;
         else if (state[i] != goal[i]) h++;
     }
@@ -155,14 +155,14 @@ int main() {
         numOfMoves = std::get<4>(node) + 1;
         if (std::get<1>(node) == goal) {
             std::cout << "Goal reached in " << std::get<4>(node) << " moves." << std::endl;
-            for (int i = 0; i < std::get<5>(node).size(); i++) {
+            for (size_t i = 0; i < std::get<5>(node).size(); i++) {
                 std::cout << std::get<5>(node)[i] << " -> ";
             }
             std::cout << "GOAL" << std::endl;
             return 1;
         }
         considerMove(ind, state, numOfMoves, solution, openVec); //O(1)    
-        for (int i = 0; i < openVec.size(); i++) { // O(M) (M cant be bigger than 4)
+        for (size_t i = 0; i < openVec.size(); i++) { // O(M) (M cant be bigger than 4)
             if (closedSet.find(std::get<1>(openVec[i])) == closedSet.end()) { // O(logN)
                 possibleSet.insert(openVec[i]); // O(logN)
             }

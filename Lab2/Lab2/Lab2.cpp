@@ -16,8 +16,8 @@ const std::vector<std::string> scheduleItems = { "MT101", "MT102", "MT103",
 
 
 struct Csp {
-	std::vector<std::string> schedule;
-	std::unordered_set<int> conflicts;
+	std::vector<std::string> schedule{};
+	std::unordered_set<int> conflicts{};
 	int score = 25;
 
 	void initialize() { // Random initial scheduele
@@ -33,7 +33,7 @@ struct Csp {
 
 	void calcConflicts() {
 		conflicts.clear();
-		for (int i = 0; i < schedule.size(); i+=3) {
+		for (size_t i = 0; i < schedule.size(); i+=3) {
 			std::string class1 = schedule[i];
 			std::string class2 = schedule[i + 1];
 			std::string class3 = schedule[i + 2];
@@ -65,10 +65,10 @@ struct Csp {
 		return ind;
 	}
 
-	int findMinConflict(int var) {
-		int prevNumConflicts = conflicts.size();
+	int findMinConflict(size_t var) {
+		size_t prevNumConflicts = conflicts.size();
 		std::vector<int> bestSwaps;
-		for (int i = 0; i < schedule.size(); i++) {
+		for (size_t i = 0; i < schedule.size(); i++) {
 			if (i == var) continue;
 			std::swap(schedule[i], schedule[var]); // Try swap
 			calcConflicts(); // Calculate conflicts
@@ -94,7 +94,7 @@ struct Csp {
 		std::replace(schedule.begin(), schedule.end(), "bbbbb", "     ");
 
 		int time = 9;
-		for (int i = 0; i < schedule.size(); i+=3) {
+		for (size_t i = 0; i < schedule.size(); i+=3) {
 			std::cout << schedule[i] << "   " << schedule[i + 1] << "   " << schedule[i + 2] << "   " << time << std::endl;
 			time++;
 			if (time == 13) time = 1;
@@ -140,8 +140,8 @@ int calcScore(std::vector<std::string> schedule) {
 
 
 void solve(Csp& csp, const int max_steps) {
-	int var = INT_MIN;
-	int value = INT_MIN;
+	int var = INT8_MIN;
+	int value = INT8_MIN;
 	for (int i = 0; i < max_steps; i++) {
 		if (csp.conflicts.size() == 0) return; // Found solution
 		var = csp.pickRandomConflict(var);
@@ -154,7 +154,7 @@ void solve(Csp& csp, const int max_steps) {
 
 void preferences(Csp& csp, const int max_steps, int max_tests) {
 	Csp bestCsp = csp;
-	int maxScore = INT_MAX;
+	int maxScore = INT8_MAX;
 	int score = 24;
 	for (int i = 0; i < max_tests; i++) {
 		csp.initialize();

@@ -2,6 +2,7 @@
 #include <unordered_set>
 #include <string>
 #include <algorithm>
+#include <vector>
 
 struct Claus {
     std::vector<std::string> p{};
