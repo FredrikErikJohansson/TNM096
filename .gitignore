@@ -11,6 +11,7 @@
 *.sln.docstates
 *.pl
 !shakey.pl
+!blocksworld.pl
 
 
 # User-specific files (MonoDevelop/Xamarin Studio)

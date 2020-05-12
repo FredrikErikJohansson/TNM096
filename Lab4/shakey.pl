@@ -1,9 +1,9 @@
 % TASK A
 
-act(go(X,Y),                        % action name
-  [in(X), on(floor), connect(X,Y)], % preconditions
-  [in(X)],                          % delete
-  [in(Y)]                           % add
+act( go(X,Y),                               % action name
+     [in(X), on(floor), connect(X,Y)],      % preconditions
+     [in(X)],                               % delete
+     [in(Y)]                                % add
 ).
 
 act( push(B, X, Y),
