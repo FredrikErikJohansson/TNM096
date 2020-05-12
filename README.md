@@ -4,3 +4,5 @@
 **Lab2:** Min-conflicts algorithm to solve a classroom scheduling problem.
 
 **Lab3:** Inference engine.
+
+**Lab4:** STRIPS planning for various tasks.
